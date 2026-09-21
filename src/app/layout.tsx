@@ -1,34 +1,21 @@
-import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "GEO-ATLAS | BPKK Kabupaten Aceh Tengah",
-  description: "Geospatial Aceh Tengah All Tax Integrated System - Single Sign-On (SSO) Portal Terpadu Pajak Daerah dan Pertanahan",
-  keywords: ["GEO-ATLAS", "BPKK Aceh Tengah", "Pajak Aceh Tengah", "Takengon", "WebGIS Pajak", "SSO BPKK"],
-  icons: {
-    icon: "/logo-bpkk-emblem.png",
-  }
+  description: "Geospatial Aceh Tengah All Tax Integrated System",
+  icons: { icon: "/logo-bpkk-emblem.png" },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable} ${jetbrainsMono.variable} dark h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#020b14] text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
+    <html lang="id">
+      <body style={{ margin: 0, padding: 0, background: "#081d38", color: "#f8fafc" }}>
         {children}
       </body>
     </html>

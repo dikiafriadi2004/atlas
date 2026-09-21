@@ -61,10 +61,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#020b14]/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6 bg-[#020b14]/90 animate-in fade-in duration-200">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-xl rounded-3xl glass-panel-glow border-2 border-cyan-500/40 bg-[#081528]/95 shadow-[0_0_60px_rgba(0,180,255,0.35)] overflow-hidden z-10 animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-xl rounded-3xl border-2 border-cyan-500/40 bg-[#081528] shadow-[0_0_60px_rgba(0,180,255,0.35)] overflow-hidden z-10 animate-in zoom-in-95 duration-200">
         {/* Top Accent Gradient */}
         <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-cyan-400 to-emerald-400" />
 
@@ -91,6 +91,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </div>
 
           <button
+            type="button"
             onClick={onClose}
             className="p-1.5 rounded-xl bg-slate-900/80 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-slate-700/60 transition-colors"
           >
@@ -103,8 +104,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* User Category Tabs */}
           <div className="grid grid-cols-2 p-1 rounded-xl bg-slate-900/90 border border-cyan-500/20">
             <button
+              type="button"
               onClick={() => setActiveTab("petugas")}
-              className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer touch-manipulation ${
                 activeTab === "petugas"
                   ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md"
                   : "text-slate-400 hover:text-white"
@@ -113,8 +115,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               Petugas BPKK
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab("wajib-pajak")}
-              className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer touch-manipulation ${
                 activeTab === "wajib-pajak"
                   ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md"
                   : "text-slate-400 hover:text-white"

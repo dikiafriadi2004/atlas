@@ -10,6 +10,7 @@ interface CentralHubProps {
   onHubLeave?: () => void;
   isExpanded: boolean;
   isLocked: boolean;
+  size?: "sm" | "lg";
 }
 
 export default function CentralHub({
@@ -18,80 +19,151 @@ export default function CentralHub({
   onHubLeave,
   isExpanded,
   isLocked,
+  size = "lg",
 }: CentralHubProps) {
+  const isSm = size === "sm";
+
+  // Ukuran button eksplisit — tidak ada scale CSS
+  const btnPx = isSm ? 120 : 224;
+
   return (
-    <div className="relative flex items-center justify-center">
-      {/* Outer decorative ring - responsif */}
-      <div className="absolute w-[210px] h-[210px] sm:w-[300px] sm:h-[300px] lg:w-[330px] lg:h-[330px] rounded-full border border-cyan-400/30 animate-spin-slow pointer-events-none" />
-
-      {/* Middle dashed ring - responsif */}
-      <div className="absolute w-[185px] h-[185px] sm:w-[265px] sm:h-[265px] lg:w-[290px] lg:h-[290px] rounded-full border border-dashed border-cyan-300/40 animate-spin-reverse pointer-events-none" />
-
-      {/* Radiant radial halo glow */}
+    /*
+      Wrapper diberi ukuran SAMA PERSIS dengan button.
+      Ring dekoratif pakai pointer-events-none + overflow-visible pada parent.
+      Ini memastikan hit area = ukuran button, bukan ukuran ring.
+    */
+    <div
+      className="relative flex items-center justify-center"
+      style={{ width: btnPx, height: btnPx }}
+    >
+      {/*
+        Ring luar — wrapper luar untuk centering (translate),
+        div dalam untuk animasi rotasi. Tidak boleh digabung:
+        keyframes spin menganimasikan `transform` sehingga akan
+        menimpa translate(-50%,-50%) dan menggeser ring di mobile.
+      */}
       <div
-        className={`absolute w-[165px] h-[165px] sm:w-[230px] sm:h-[230px] lg:w-[260px] lg:h-[260px] rounded-full transition-all duration-500 pointer-events-none ${
-          isExpanded
-            ? "bg-cyan-400/25 blur-2xl scale-110"
-            : "bg-cyan-500/15 blur-xl"
-        }`}
+        aria-hidden="true"
+        className="absolute pointer-events-none"
+        style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+      >
+        <div
+          className="animate-spin-slow rounded-full border border-cyan-400/30"
+          style={{ width: isSm ? 160 : 330, height: isSm ? 160 : 330 }}
+        />
+      </div>
+      {/* Ring tengah — pointer-events-none */}
+      <div
+        aria-hidden="true"
+        className="absolute pointer-events-none"
+        style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+      >
+        <div
+          className="animate-spin-reverse rounded-full border border-dashed border-cyan-300/40"
+          style={{ width: isSm ? 140 : 290, height: isSm ? 140 : 290 }}
+        />
+      </div>
+      {/* Halo glow — pointer-events-none */}
+      <div
+        aria-hidden="true"
+        className="absolute pointer-events-none rounded-full transition-all duration-500"
+        style={{
+          width:  isSm ? 125 : 260,
+          height: isSm ? 125 : 260,
+          top:  "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          background: isExpanded ? "rgba(34,211,238,0.2)" : "rgba(6,182,212,0.1)",
+          filter: isExpanded ? "blur(18px)" : "blur(12px)",
+        }}
       />
 
-      {/* Core circle button - responsif */}
+      {/* Button — ukuran eksplisit, TANPA backdrop-blur (menyebabkan compositing layer di mobile) */}
       <button
         type="button"
         onClick={onHubClick}
         onMouseEnter={onHubEnter}
         onMouseLeave={onHubLeave}
-        className={`group relative z-40 w-40 h-40 sm:w-52 sm:h-52 lg:w-56 lg:h-56 rounded-full flex flex-col items-center justify-center p-2 sm:p-3 text-center transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden focus:outline-none bg-gradient-to-b from-[#0f3b6c]/90 via-[#0a2c52]/92 to-[#08203c]/95 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${
-          isLocked
-            ? "border-2 border-cyan-300 shadow-[0_0_40px_rgba(0,230,255,0.6)] ring-2 ring-cyan-300/50"
-            : "border-2 border-cyan-400/70 hover:border-cyan-300 shadow-[0_0_25px_rgba(0,210,255,0.35)] hover:shadow-[0_0_35px_rgba(0,230,255,0.6)]"
-        }`}
+        style={{
+          width:  btnPx,
+          height: btnPx,
+          WebkitTapHighlightColor: "transparent",
+          flexShrink: 0,
+        }}
+        className={`
+          relative z-10 rounded-full flex flex-col items-center justify-center
+          cursor-pointer select-none touch-manipulation
+          bg-gradient-to-b from-[#0f3b6c]/95 via-[#0a2c52]/95 to-[#08203c]/98
+          transition-all duration-300
+          focus:outline-none
+          ${isLocked
+            ? "border-2 border-cyan-300 shadow-[0_0_30px_rgba(0,230,255,0.5)] ring-2 ring-cyan-300/40"
+            : "border-2 border-cyan-400/60 hover:border-cyan-300"
+          }
+        `}
       >
-        {/* Child container has pointer-events-none to prevent boundary glitch */}
-        <div className="pointer-events-none flex flex-col items-center justify-center">
-          {/* Logo */}
-          <div className="relative w-14 h-14 sm:w-20 sm:h-20 lg:w-[88px] lg:h-[88px] mb-1 sm:mb-1.5 transition-transform duration-300 group-hover:scale-105">
-            <Image
-              src="/logo-bpkk-emblem.png"
-              alt="BPKK Logo"
-              fill
-              sizes="(max-width: 640px) 56px, 88px"
-              priority
-              className="object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.8)]"
-            />
-          </div>
-
-          <div className="relative z-10 px-2">
-            <p className="text-[9.5px] sm:text-[11px] font-extrabold uppercase tracking-wider text-white leading-tight group-hover:text-cyan-100 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-              BADAN PENGELOLAAN KEUANGAN
-            </p>
-            <p className="text-[8px] sm:text-[9.5px] font-bold uppercase tracking-widest text-cyan-300 leading-tight mt-0.5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
-              KABUPATEN ACEH TENGAH
-            </p>
-          </div>
-
-          {/* Status badge: locked or hover prompt */}
-          {isLocked ? (
-            <div className="mt-1.5 px-2.5 py-0.5 rounded-full bg-cyan-900/90 border border-cyan-300/80 flex items-center gap-1 shadow-[0_0_12px_rgba(0,240,255,0.5)]">
-              <Lock className="w-3 h-3 text-cyan-200" />
-              <span className="text-[8.5px] font-mono font-bold text-cyan-100 uppercase tracking-wider">
-                Terkunci
-              </span>
-            </div>
-          ) : (
-            <div className="mt-1.5 px-2 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-400/40 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-[0_0_10px_rgba(0,240,255,0.3)]">
-              <Unlock className="w-2.5 h-2.5 text-cyan-300" />
-              <span className="text-[8px] font-mono font-semibold text-cyan-200 uppercase tracking-tight">
-                Klik kunci
-              </span>
-            </div>
-          )}
+        {/* Logo */}
+        <div
+          className="relative flex-shrink-0"
+          style={{ width: isSm ? 38 : 80, height: isSm ? 38 : 80, pointerEvents: "none" }}
+        >
+          <Image
+            src="/logo-bpkk-emblem.png"
+            alt="BPKK Logo"
+            fill
+            sizes={isSm ? "38px" : "80px"}
+            priority
+            className="object-contain"
+            style={{ pointerEvents: "none", userSelect: "none" }}
+          />
         </div>
 
-        {/* Locked pin indicator on top-right */}
+        {/* Teks — pointer-events none agar tidak intercept tap */}
+        <div style={{ pointerEvents: "none" }} className="flex flex-col items-center px-1 mt-1">
+          <p
+            className="font-extrabold uppercase text-white leading-tight text-center"
+            style={{ fontSize: isSm ? 7 : 10, letterSpacing: "0.05em" }}
+          >
+            BADAN PENGELOLAAN KEUANGAN
+          </p>
+          <p
+            className="font-bold uppercase text-cyan-300 leading-tight text-center mt-0.5"
+            style={{ fontSize: isSm ? 6 : 9, letterSpacing: "0.08em" }}
+          >
+            KABUPATEN ACEH TENGAH
+          </p>
+
+          {/* Badge */}
+          <div
+            className={`mt-1 flex items-center gap-1 px-1.5 py-0.5 rounded-full border ${
+              isLocked ? "bg-cyan-900/90 border-cyan-300/70" : "bg-cyan-950/70 border-cyan-400/30"
+            }`}
+          >
+            {isLocked ? (
+              <>
+                <Lock style={{ width: isSm ? 8 : 11, height: isSm ? 8 : 11 }} className="text-cyan-200 flex-shrink-0" />
+                <span className="font-mono font-bold text-cyan-100 uppercase" style={{ fontSize: isSm ? 6 : 8 }}>
+                  Terkunci
+                </span>
+              </>
+            ) : (
+              <>
+                <Unlock style={{ width: isSm ? 8 : 11, height: isSm ? 8 : 11 }} className="text-cyan-300 flex-shrink-0" />
+                <span className="font-mono text-cyan-200 uppercase" style={{ fontSize: isSm ? 6 : 8 }}>
+                  {isSm ? "Tap" : "Klik buka"}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Dot locked */}
         {isLocked && (
-          <div className="absolute top-3.5 right-3.5 w-3.5 h-3.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(0,240,255,0.9)] pointer-events-none animate-pulse" />
+          <div
+            aria-hidden="true"
+            className="absolute top-2 right-2 rounded-full bg-cyan-300 animate-pulse"
+            style={{ width: 8, height: 8, pointerEvents: "none" }}
+          />
         )}
       </button>
     </div>

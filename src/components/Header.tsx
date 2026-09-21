@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
   User,
@@ -17,25 +17,45 @@ export default function Header({
   onOpenAuthModal
 }: HeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [currentDate] = useState(() =>
-    new Date().toLocaleDateString("id-ID", {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    setCurrentDate(new Date().toLocaleDateString("id-ID", {
       weekday: "short",
       day: "2-digit",
       month: "short",
       year: "numeric"
-    })
-  );
+    }));
+  }, []);
+
+  // Close dropdown when clicking/tapping outside
+  useEffect(() => {
+    function handleOutsideClick(e: MouseEvent | TouchEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+      document.addEventListener("touchstart", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, [isDropdownOpen]);
 
   return (
-    <header className="sticky top-0 z-40 w-full">
+    <div className="w-full">
       {/* Garis aksen gradasi atas */}
       <div className="h-[2px] w-full bg-gradient-to-r from-blue-600 via-cyan-400 to-emerald-400" />
 
-      <div className="relative w-full px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 bg-gradient-to-r from-[#06182f]/95 via-[#0b2c52]/90 to-[#06182f]/95 backdrop-blur-2xl border-b border-cyan-400/25 shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
-        {/* Glow dekoratif - dibungkus agar tidak memotong dropdown */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-          <div className="absolute -top-16 left-1/4 w-72 h-32 bg-cyan-500/15 blur-3xl rounded-full" />
-          <div className="absolute -bottom-20 right-1/4 w-72 h-32 bg-blue-600/15 blur-3xl rounded-full" />
+      <div className="relative w-full px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 bg-gradient-to-r from-[#06182f]/98 via-[#0b2c52]/98 to-[#06182f]/98 border-b border-cyan-400/25 shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
+        {/* Glow dekoratif — pointer-events-none, tidak memblok apapun */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <div className="absolute -top-16 left-1/4 w-72 h-32 bg-cyan-500/10 blur-3xl rounded-full" />
+          <div className="absolute -bottom-20 right-1/4 w-72 h-32 bg-blue-600/10 blur-3xl rounded-full" />
         </div>
 
         {/* Kiri: Logo + Identitas */}
@@ -68,7 +88,7 @@ export default function Header({
               BPKK Kabupaten Aceh Tengah
             </span>
             {currentDate && (
-              <span className="text-[10px] text-cyan-200/70 font-mono whitespace-nowrap">
+              <span suppressHydrationWarning className="text-[10px] text-cyan-200/70 font-mono whitespace-nowrap">
                 {currentDate}
               </span>
             )}
@@ -76,10 +96,13 @@ export default function Header({
         </div>
 
         {/* Kanan: Menu pengguna */}
-        <div className="relative flex items-center flex-shrink-0">
+        <div ref={dropdownRef} className="relative flex items-center flex-shrink-0">
           <button
+            type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className={`flex items-center gap-2 sm:gap-2.5 pl-1.5 pr-2 sm:pr-3 py-1.5 rounded-full border transition-all duration-200 ${
+            aria-haspopup="true"
+            aria-expanded={isDropdownOpen}
+            className={`flex items-center gap-2 sm:gap-2.5 pl-1.5 pr-2 sm:pr-3 py-1.5 rounded-full border transition-all duration-200 touch-manipulation ${
               isDropdownOpen
                 ? "bg-[#0e3560]/95 border-cyan-300 shadow-[0_0_24px_rgba(56,189,248,0.45)]"
                 : "bg-gradient-to-b from-[#0d2a4d]/90 to-[#081f38]/90 border-cyan-400/40 hover:border-cyan-300 hover:shadow-[0_0_22px_rgba(56,189,248,0.4)]"
@@ -103,8 +126,7 @@ export default function Header({
           {/* Dropdown */}
           {isDropdownOpen && (
             <div
-              className="absolute right-0 top-full mt-2 w-72 rounded-2xl overflow-hidden bg-[#0b2444]/95 backdrop-blur-xl shadow-2xl border border-cyan-400/40 animate-in fade-in slide-in-from-top-2 duration-200 z-50"
-              onMouseLeave={() => setIsDropdownOpen(false)}
+              className="absolute right-0 top-full mt-2 w-72 rounded-2xl overflow-hidden bg-[#0b2444]/98 shadow-2xl border border-cyan-400/40 animate-in fade-in slide-in-from-top-2 duration-200 z-[60]"
             >
               <div className="h-1 w-full bg-gradient-to-r from-blue-600 via-cyan-400 to-emerald-400" />
               <div className="px-4 py-3 border-b border-cyan-500/20 flex items-center gap-3">
@@ -122,6 +144,7 @@ export default function Header({
 
               <div className="p-2">
                 <button
+                  type="button"
                   onClick={() => {
                     setIsDropdownOpen(false);
                     onOpenAuthModal();
@@ -141,6 +164,6 @@ export default function Header({
           )}
         </div>
       </div>
-    </header>
+    </div>
   );
 }
